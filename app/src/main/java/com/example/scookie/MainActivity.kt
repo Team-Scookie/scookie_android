@@ -3,6 +3,7 @@ package com.example.scookie
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,20 +14,20 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import net.daum.mf.map.api.MapView
 
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, LocationSource.OnLocationChangedListener {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1001
+        lateinit var mGoogleMap : GoogleMap
     }
+
     val TAG = "MainActivity"
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -47,8 +48,37 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onMapReady(googleMap: GoogleMap?) {
         googleMap?.apply {
+            mGoogleMap = googleMap
+            checkPermission()
+            mGoogleMap.isMyLocationEnabled = true
+            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
+            setDefaultLocation(mGoogleMap)
+        }
+    }
+
+    /** TODO
+     * RequiresApi 알아보
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            checkSelfPermission()
+        }
+        return
+    }
+
+    private fun setDefaultLocation(mGoogleMap: GoogleMap) {
+        mGoogleMap.apply {
             val sydney = LatLng(-33.852, 151.211)
             addMarker(
                 MarkerOptions()
@@ -97,7 +127,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun showDialogToGetPermission() {
+    private fun showDialogToGetPermission(){
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Permisisons request")
             .setMessage("We need the location permission for some reason. " +
@@ -115,5 +145,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    override fun onMyLocationButtonClick(): Boolean {
+        /** TODO
+         * 기능 구현하기
+         */
+        return true
+    }
+
+    override fun onLocationChanged(location: Location) {
+        val currentLocationLatLng = LatLng(location.latitude, location.longitude)
+        mGoogleMap?.apply {
+            addMarker(
+                MarkerOptions()
+                    .position(currentLocationLatLng)
+                    .title("Marker in Your Place")
+            )
+
+            moveCamera(CameraUpdateFactory.newLatLng(currentLocationLatLng))
+        }
+
     }
 }
