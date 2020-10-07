@@ -3,6 +3,7 @@ package com.example.scookie
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.net.Uri
 import android.os.Build
@@ -18,29 +19,36 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import net.daum.mf.map.api.MapView
 
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, LocationSource.OnLocationChangedListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnLocationChangedListener {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1001
         lateinit var mGoogleMap : GoogleMap
+        lateinit var polylineOptions: PolylineOptions
     }
 
-    val TAG = "MainActivity"
+    val TAG = "MainActivity TAG"
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (getString(R.string.maps_api_key).isEmpty()) {
-            Toast.makeText(this, "Add your own API key in MapWithMarker/app/secure.properties as MAPS_API_KEY=YOUR_API_KEY", Toast.LENGTH_LONG).show()
-        }
 
         checkSelfPermission()
+        checkMapsApiKey()
         initMap()
+    }
+
+    private fun checkMapsApiKey() {
+        if (getString(R.string.maps_api_key).isEmpty()) {
+            Toast.makeText(this, "Add your own API key in secure.properties as MAPS_API_KEY=YOUR_API_KEY", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun initMap() {
@@ -56,6 +64,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLoca
             mGoogleMap.isMyLocationEnabled = true
             mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
             setDefaultLocation(mGoogleMap)
+
+            polylineOptions = PolylineOptions().width(3F).color(Color.BLACK)
         }
     }
 
@@ -147,24 +157,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMyLoca
         dialog.show()
     }
 
-    override fun onMyLocationButtonClick(): Boolean {
-        /** TODO
-         * 기능 구현하기
-         */
-        return true
-    }
-
     override fun onLocationChanged(location: Location) {
+        Log.d(TAG, "onLocationChanged")
         val currentLocationLatLng = LatLng(location.latitude, location.longitude)
         mGoogleMap?.apply {
-            addMarker(
-                MarkerOptions()
-                    .position(currentLocationLatLng)
-                    .title("Marker in Your Place")
-            )
-
+            polylineOptions.add(currentLocationLatLng)
+            mGoogleMap.addPolyline(polylineOptions)
             moveCamera(CameraUpdateFactory.newLatLng(currentLocationLatLng))
         }
-
     }
 }
