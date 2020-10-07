@@ -6,18 +6,55 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context=".LoginActivity">
 
-<com.google.android.material.textfield.TextInputLayout
-    android:id="@+id/userEmailTextInputLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:layout_constraintTop_toTopOf="parent"
-    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_getId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+       android:text="@string/getEmail"
+        android:layout_marginTop="156dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp"
+        android:textSize="18sp"/>
 
-    <com.google.android.material.textfield.TextInputEditText
+    <View
+        android:layout_width="50dp"
+        android:layout_height="8dp"
+        android:background="#330497CD"
+        app:layout_constraintStart_toStartOf="@id/tv_getId"
+        app:layout_constraintBottom_toBottomOf="@id/tv_getId"
+        />
+    
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/userEmailTextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"/>
+        app:layout_constraintTop_toBottomOf="@id/tv_getId"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-</com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"/>
 
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/outlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="@string/login"
+        android:textColor="@color/lightGray"
+        style="?attr/materialButtonOutlinedStyle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="30dp"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

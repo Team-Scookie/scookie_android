@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Scookie</string>
+    <string name="getEmail">이메일을 입력해주세요</string>
+    <string name="login">로그인</string>
 </resources>
