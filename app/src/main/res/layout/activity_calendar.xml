@@ -6,4 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".CalendarActivity">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/act_calendar_rv_calendarCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
