@@ -1,10 +1,11 @@
-package com.example.scookie
+package com.example.scookie.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.example.scookie.R
 
 class CalendarRVAdapter(val ctx: FragmentActivity, var dataList: MutableList<String>) : RecyclerView.Adapter<CalendarRVAdapter.Holder>() {
 
