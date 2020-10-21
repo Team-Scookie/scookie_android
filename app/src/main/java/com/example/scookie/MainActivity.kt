@@ -1,35 +1,41 @@
 package com.example.scookie
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.activity_main.*
-import net.daum.mf.map.api.MapView
 
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnLocationChangedListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1001
         lateinit var mGoogleMap : GoogleMap
-        lateinit var polylineOptions: PolylineOptions
+        const val ZOOM_LEVEL = 19f
+        const val MIN_TIME_MS: Long = 5000 // 5초
+        const val MIN_DISTANCE_M : Float = 100f // 100M
+        const val PATTERN_WIDTH : Float = 20f // 20px
+        lateinit var currentLatLng: LatLng
+        lateinit var endLatLng: LatLng
+        lateinit var startLatLng: LatLng
+        var polylines : MutableList<Polyline> = mutableListOf()
+        var Flag : Boolean = false
     }
 
     val TAG = "MainActivity TAG"
@@ -38,11 +44,72 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
+        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show()
         checkSelfPermission()
         checkMapsApiKey()
+        setOnBtnClickListener()
         initMap()
+    }
+
+    private fun setOnBtnClickListener() {
+        actMainBtnStart.setOnClickListener {
+            startLatLng = currentLatLng
+            Flag = true
+        }
+    }
+
+    //define the listener
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            currentLatLng = LatLng(location.latitude, location.longitude)
+            Toast.makeText(applicationContext, "" + location.longitude + ":" + location.latitude, Toast.LENGTH_SHORT).show()
+
+            val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
+
+            mGoogleMap.apply {
+                moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+                animateCamera(zoom);
+            }
+
+            endLatLng = currentLatLng
+            if(Flag) drawPath(startLatLng, endLatLng)
+            startLatLng = currentLatLng
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
+
+    private fun drawPath(startLatLng: LatLng, endLatLng: LatLng) {
+        /** TODO
+         *  width dpToPx 사용하기
+         */
+        val dash : PatternItem =  Dash(PATTERN_WIDTH)
+        val gap : PatternItem = Gap(PATTERN_WIDTH)
+        var dashedLine : List<PatternItem> = listOf(gap, dash);
+
+        val options :PolylineOptions = PolylineOptions()
+            .add(startLatLng)
+            .add(endLatLng)
+            .geodesic(true)
+            .color(R.color.colorBrown)
+            .width(20f)
+            .pattern(dashedLine)
+            .startCap(RoundCap())
+
+        polylines.add(mGoogleMap.addPolyline(options))
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestLocation() {
+        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        // MIN_TIME_MS 와 MIN_DISTANCE_M 를 만족할 시, onLocationChanged 함수를 호출합니다.
+        locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
+            MIN_DISTANCE_M,
+            locationListener);
+        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_MS,MIN_DISTANCE_M,
+            locationListener);
     }
 
     private fun checkMapsApiKey() {
@@ -64,8 +131,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnL
             mGoogleMap.isMyLocationEnabled = true
             mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
             setDefaultLocation(mGoogleMap)
-
-            polylineOptions = PolylineOptions().width(3F).color(Color.BLACK)
         }
     }
 
@@ -104,6 +169,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnL
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG,"Permission granted")
+            requestLocation()
         } else {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), // 1
                 PERMISSION_REQUEST_CODE) // 2
@@ -156,14 +222,5 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, LocationSource.OnL
         val dialog = builder.create()
         dialog.show()
     }
-
-    override fun onLocationChanged(location: Location) {
-        Log.d(TAG, "onLocationChanged")
-        val currentLocationLatLng = LatLng(location.latitude, location.longitude)
-        mGoogleMap?.apply {
-            polylineOptions.add(currentLocationLatLng)
-            mGoogleMap.addPolyline(polylineOptions)
-            moveCamera(CameraUpdateFactory.newLatLng(currentLocationLatLng))
-        }
-    }
 }
+
