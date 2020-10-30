@@ -118,12 +118,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         override fun onProviderDisabled(provider: String) {}
     }
 
+    private fun cameraZoom() {
+        val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
+        mGoogleMap.apply {
+            moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            animateCamera(zoom)
+        }
+    }
+
     private fun drawPath(startLatLng: LatLng, endLatLng: LatLng) {
         /** TODO
          *  width dpToPx 사용하기
          */
-        val dash : PatternItem =  Dash(PATTERN_WIDTH)
-        val gap : PatternItem = Gap(PATTERN_WIDTH)
+        val dash : PatternItem =  Dash(LINE_WIDTH)
+        val gap : PatternItem = Gap(LINE_WIDTH)
         var dashedLine : List<PatternItem> = listOf(gap, dash);
 
         val options :PolylineOptions = PolylineOptions()
@@ -131,7 +139,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             .add(endLatLng)
             .geodesic(true)
             .color(R.color.colorBrown)
-            .width(20f)
+            .width(LINE_WIDTH)
             .pattern(dashedLine)
             .startCap(RoundCap())
 
@@ -144,9 +152,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // MIN_TIME_MS 와 MIN_DISTANCE_M 를 만족할 시, onLocationChanged 함수를 호출합니다.
         locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
             MIN_DISTANCE_M,
-            locationListener);
-        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_MS,MIN_DISTANCE_M,
-            locationListener);
+            locationListener)
+//        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_MS,MIN_DISTANCE_M,
+//            locationListener)
     }
 
     private fun checkMapsApiKey() {
