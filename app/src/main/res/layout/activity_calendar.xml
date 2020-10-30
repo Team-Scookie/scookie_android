@@ -37,6 +37,29 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!--
+    <me.relex.circleindicator.CircleIndicator2
+        android:id="@+id/circleIndicator"
+        app:layout_constraintTop_toBottomOf="@id/act_calendar_constraint_month"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#000000"/>
+    -->
+    <com.google.android.material.appbar.AppBarLayout
+        app:layout_constraintTop_toBottomOf="@id/act_calendar_constraint_month"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <devs.mulham.horizontalcalendar.HorizontalCalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        app:textColorSelected="#FFFF" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/act_calendar_rv_calendarCard"
         android:layout_width="0dp"

@@ -22,11 +22,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:scaleType="centerCrop"
-                android:background="#000000">
-
-
-
-            </ImageView>
+                android:background="#000000" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
