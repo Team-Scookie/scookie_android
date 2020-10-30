@@ -22,8 +22,24 @@ android {
         }
         resValue "string", "maps_api_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
 
+        /**
+         * @author ChoSooMin
+         * @feature Calendar
+         */
         // Required ONLY when setting minSdkVersion to 20 or lower
         multiDexEnabled true
+    }
+
+    /**
+     * @author ChoSooMin
+     * @feature Calendar
+     */
+    compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+        // Sets Java compatibility to Java 8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -52,8 +68,6 @@ dependencies {
 
     // indicator
     implementation 'me.relex:circleindicator:2.1.4'
-    // calendar
-    implementation 'devs.mulham.horizontalcalendar:horizontalcalendar:1.3.4'
 
     def koin_version = '2.0.1'
 
@@ -71,4 +85,11 @@ dependencies {
     implementation "org.koin:koin-androidx-viewmodel:$koin_version"
 // Koin AndroidX Experimental features
     implementation "org.koin:koin-androidx-ext:$koin_version"
+
+    /**
+     * @author ChoSooMin
+     * @feature CalendarView
+     */
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
+    implementation 'com.github.kizitonwose:CalendarView:0.4.5'
 }
