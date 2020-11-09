@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         var startDate: Date = Date(startTime)
         var now : Long = System.currentTimeMillis()
         var nowDate : Date = Date(now)
-        const val BASE_TIME : Long = 3 // 3분
+        const val BASE_TIME : Long = 1 // 1분
 
         // 위치 관련 변수
         lateinit var mGoogleMap : GoogleMap
@@ -82,13 +82,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             mHandler = object : Handler() {
                 // THREAD_MS 마다 실행됩니다.
                 override fun handleMessage(msg: Message) {
-                    // 이전 위치에서 이동해서(AND) 3분 이상 있었던 경우
+                    // 이전 위치에서 이동해서(AND) 1분 이상 있었던 경우
                     if(preLatLng != endLatLng && getMinOfStay() >= BASE_TIME) {
                         drawPath(preLatLng, endLatLng)
                         preLatLng = endLatLng
-                        Toast.makeText(applicationContext, "3분 경과", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(applicationContext, "1분 경과", Toast.LENGTH_SHORT).show()
                     }
-                    Toast.makeText(applicationContext, "hi", Toast.LENGTH_SHORT).show()
                 }
             }
 
