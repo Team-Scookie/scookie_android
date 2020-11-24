@@ -3,6 +3,7 @@ package com.example.scookie.ui.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scookie.R
@@ -20,8 +21,7 @@ class CalendarRVAdapter(val ctx: FragmentActivity, var dataList: MutableList<Str
     override fun getItemCount(): Int = dataList.size;
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-
-
+//        Toast.makeText(ctx, "ㅗㅑ", Toast.LENGTH_SHORT).show()
     }
 
 
