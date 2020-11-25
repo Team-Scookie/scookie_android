@@ -9,8 +9,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
+import android.os.*
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -18,99 +17,54 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import kotlinx.android.synthetic.main.activity_main.*
-
+import java.util.*
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
+        const val TAG = "MainActivity TAG"
         const val PERMISSION_REQUEST_CODE = 1001
+        const val ZOOM_LEVEL = 17f
+        const val MIN_TIME_MS: Long = 0 // 1초 1000
+        const val MIN_DISTANCE_M : Float = 50f // 50M 50f
+        const val LINE_WIDTH : Float = 12f // 12px
+        const val THREAD_MS : Long = 1000 // 1초
+
+        // 시간 계산 관련 변수들
+        var startTime : Long = System.currentTimeMillis()
+        var startDate: Date = Date(startTime)
+        var now : Long = System.currentTimeMillis()
+        var nowDate : Date = Date(now)
+        const val BASE_TIME : Long = 1 // 1분
+        const val MARKER_TIME : Long = 30 // 30분
+
+        // 위치 관련 변수
         lateinit var mGoogleMap : GoogleMap
-        const val ZOOM_LEVEL = 19f
-        const val MIN_TIME_MS: Long = 5000 // 5초
-        const val MIN_DISTANCE_M : Float = 100f // 100M
-        const val PATTERN_WIDTH : Float = 20f // 20px
         lateinit var currentLatLng: LatLng
         lateinit var endLatLng: LatLng
-        lateinit var startLatLng: LatLng
-        var polylines : MutableList<Polyline> = mutableListOf()
-        var Flag : Boolean = false
+        var preLatLng : LatLng? = null
+
+        // 스레드 관련 변수들
+        private var mHandler: Handler? = null
+
+        private var polylines : MutableList<Polyline> = mutableListOf()
     }
 
-    val TAG = "MainActivity TAG"
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show()
         checkSelfPermission()
         checkMapsApiKey()
-        setOnBtnClickListener()
         initMap()
     }
 
-    private fun setOnBtnClickListener() {
-        actMainBtnStart.setOnClickListener {
-            startLatLng = currentLatLng
-            Flag = true
-        }
-    }
-
-    //define the listener
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            currentLatLng = LatLng(location.latitude, location.longitude)
-            Toast.makeText(applicationContext, "" + location.longitude + ":" + location.latitude, Toast.LENGTH_SHORT).show()
-
-            val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
-
-            mGoogleMap.apply {
-                moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
-                animateCamera(zoom);
-            }
-
-            endLatLng = currentLatLng
-            if(Flag) drawPath(startLatLng, endLatLng)
-            startLatLng = currentLatLng
-        }
-
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
-
-    private fun drawPath(startLatLng: LatLng, endLatLng: LatLng) {
-        /** TODO
-         *  width dpToPx 사용하기
-         */
-        val dash : PatternItem =  Dash(PATTERN_WIDTH)
-        val gap : PatternItem = Gap(PATTERN_WIDTH)
-        var dashedLine : List<PatternItem> = listOf(gap, dash);
-
-        val options :PolylineOptions = PolylineOptions()
-            .add(startLatLng)
-            .add(endLatLng)
-            .geodesic(true)
-            .color(R.color.colorBrown)
-            .width(20f)
-            .pattern(dashedLine)
-            .startCap(RoundCap())
-
-        polylines.add(mGoogleMap.addPolyline(options))
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun requestLocation() {
-        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        // MIN_TIME_MS 와 MIN_DISTANCE_M 를 만족할 시, onLocationChanged 함수를 호출합니다.
-        locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
-            MIN_DISTANCE_M,
-            locationListener);
-        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_MS,MIN_DISTANCE_M,
-            locationListener);
-    }
 
     private fun checkMapsApiKey() {
         if (getString(R.string.maps_api_key).isEmpty()) {
@@ -132,8 +86,125 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
             setDefaultLocation(mGoogleMap)
         }
+
+        trackingLocation()
     }
 
+    private fun setDefaultLocation(mGoogleMap: GoogleMap) {
+        mGoogleMap.apply {
+            val sydney = LatLng(-33.852, 151.211)
+            moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        }
+    }
+
+    private fun trackingLocation() {
+        @SuppressLint("HandlerLeak")
+        mHandler = object : Handler() {
+            // THREAD_MS 마다 실행됩니다.
+            override fun handleMessage(msg: Message) {
+                if(preLatLng != null) {
+                    // 이전 위치에서 이동해서(AND) 1분 이상 있었던 경우
+                    if (preLatLng != endLatLng && getMinOfStay() >= BASE_TIME) {
+                        drawPath(preLatLng!!, endLatLng)
+                        preLatLng = endLatLng
+                    }
+
+                    // 30분 이상 머문 경우
+                    if(preLatLng != endLatLng && getMinOfStay() >= MARKER_TIME) {
+                        createMarker(preLatLng!!, getMinOfStay())
+                    }
+                }
+            }
+        }
+
+        thread(start = true) {
+            while (true) {
+                Thread.sleep(THREAD_MS)
+                mHandler?.sendEmptyMessage(0)
+            }
+        }
+    }
+
+    private fun createMarker(latLng: LatLng, minOfStay: Long) {
+        mGoogleMap.apply {
+            val newLatLng = latLng
+            addMarker(
+                MarkerOptions()
+                    .position(newLatLng)
+                    .title(minOfStay.toString())
+            )
+            /** TODO
+             *  마커 생성시 마커 비춰야하는지?
+             */
+            // moveCamera(CameraUpdateFactory.newLatLng(newLatLng))
+        }
+    }
+
+    private fun getMinOfStay() : Long {
+        now = System.currentTimeMillis()
+        nowDate = Date(now)
+        val duration : Long = nowDate.time - startDate.time
+
+        return duration/60000
+    }
+
+    private fun drawPath(startLatLng: LatLng, endLatLng: LatLng) {
+        /** TODO
+         *  width dpToPx 사용하기
+         */
+        val dash : PatternItem =  Dash(LINE_WIDTH)
+        val gap : PatternItem = Gap(LINE_WIDTH)
+        var dashedLine : List<PatternItem> = listOf(gap, dash);
+
+        val options :PolylineOptions = PolylineOptions()
+            .add(startLatLng)
+            .add(endLatLng)
+            .geodesic(true)
+            .color(R.color.colorBrown)
+            .width(LINE_WIDTH)
+            .pattern(dashedLine)
+            .startCap(RoundCap())
+
+        polylines.add(mGoogleMap.addPolyline(options))
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestLocation() {
+        val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        // MIN_TIME_MS 와 MIN_DISTANCE_M 를 만족할 시, onLocationChanged 함수를 호출합니다.
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
+            MIN_DISTANCE_M,
+            locationListener)
+    }
+
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            startTime = System.currentTimeMillis()
+            startDate = Date(startTime)
+
+            currentLatLng = LatLng(location.latitude, location.longitude)
+            if(preLatLng == null) setPreLatLng(currentLatLng)
+            endLatLng = currentLatLng!!
+
+            cameraZoom()
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
+
+    private fun setPreLatLng(latLng: LatLng) {
+        preLatLng = latLng
+    }
+
+    fun cameraZoom() {
+        val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
+        mGoogleMap.apply {
+            moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            animateCamera(zoom)
+        }
+    }
     /** TODO
      * RequiresApi 알아보
      */
@@ -150,18 +221,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             checkSelfPermission()
         }
         return
-    }
-
-    private fun setDefaultLocation(mGoogleMap: GoogleMap) {
-        mGoogleMap.apply {
-            val sydney = LatLng(-33.852, 151.211)
-            addMarker(
-                MarkerOptions()
-                    .position(sydney)
-                    .title("Marker in Sydney")
-            )
-            moveCamera(CameraUpdateFactory.newLatLng(sydney))
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
