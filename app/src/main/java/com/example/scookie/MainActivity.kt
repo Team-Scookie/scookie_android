@@ -9,10 +9,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Message
+import android.os.*
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -20,12 +17,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.concurrent.thread
-
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     companion object {
@@ -34,7 +32,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         const val ZOOM_LEVEL = 17f
         const val MIN_TIME_MS: Long = 0 // 1초 1000
         const val MIN_DISTANCE_M : Float = 50f // 50M 50f
-        const val LINE_WIDTH : Float = 15f // 15px
+        const val LINE_WIDTH : Float = 12f // 12px
         const val THREAD_MS : Long = 1000 // 1초
 
         // 시간 계산 관련 변수들
@@ -48,11 +46,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         lateinit var mGoogleMap : GoogleMap
         lateinit var currentLatLng: LatLng
         lateinit var endLatLng: LatLng
-        lateinit var preLatLng : LatLng
+        var preLatLng : LatLng? = null
 
         // 스레드 관련 변수들
         private var mHandler: Handler? = null
+
+        private var polylines : MutableList<Polyline> = mutableListOf()
     }
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,69 +61,70 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_main)
         checkSelfPermission()
         checkMapsApiKey()
-        setOnBtnClickListener()
         initMap()
+    }
+
+
+    private fun checkMapsApiKey() {
+        if (getString(R.string.maps_api_key).isEmpty()) {
+            Toast.makeText(this, "Add your own API key in secure.properties as MAPS_API_KEY=YOUR_API_KEY", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun initMap() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.actMainMapFrag) as? SupportMapFragment
+        mapFragment?.getMapAsync(this)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onMapReady(googleMap: GoogleMap?) {
+        googleMap?.apply {
+            mGoogleMap = googleMap
+            checkPermission()
+            mGoogleMap.isMyLocationEnabled = true
+            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
+            setDefaultLocation(mGoogleMap)
+        }
+
+        trackingLocation()
+    }
+
+    private fun setDefaultLocation(mGoogleMap: GoogleMap) {
+        mGoogleMap.apply {
+            val sydney = LatLng(-33.852, 151.211)
+            moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        }
+    }
+
+    private fun trackingLocation() {
+        @SuppressLint("HandlerLeak")
+        mHandler = object : Handler() {
+            // THREAD_MS 마다 실행됩니다.
+            override fun handleMessage(msg: Message) {
+                if(preLatLng != null) {
+                    // 이전 위치에서 이동해서(AND) 1분 이상 있었던 경우
+                    if (preLatLng != endLatLng && getMinOfStay() >= BASE_TIME) {
+                        drawPath(preLatLng!!, endLatLng)
+                        preLatLng = endLatLng
+                    }
+                }
+            }
+        }
+
+        thread(start = true) {
+            while (true) {
+                Thread.sleep(THREAD_MS)
+                mHandler?.sendEmptyMessage(0)
+            }
+        }
     }
 
     private fun getMinOfStay() : Long {
         now = System.currentTimeMillis()
         nowDate = Date(now)
-        var duration : Long = nowDate.time - startDate.time
+        val duration : Long = nowDate.time - startDate.time
 
         return duration/60000
-    }
-
-    var polylines : MutableList<Polyline> = mutableListOf()
-
-    private fun setOnBtnClickListener() {
-        actMainBtnStart.setOnClickListener {
-            preLatLng = currentLatLng
-
-            @SuppressLint("HandlerLeak")
-            mHandler = object : Handler() {
-                // THREAD_MS 마다 실행됩니다.
-                override fun handleMessage(msg: Message) {
-                    // 이전 위치에서 이동해서(AND) 1분 이상 있었던 경우
-                    if(preLatLng != endLatLng && getMinOfStay() >= BASE_TIME) {
-                        drawPath(preLatLng, endLatLng)
-                        preLatLng = endLatLng
-                        Toast.makeText(applicationContext, "1분 경과", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            thread(start = true) {
-                while (true) {
-                    Thread.sleep(THREAD_MS)
-                    mHandler?.sendEmptyMessage(0)
-                }
-            }
-        }
-    }
-
-    //define the listener
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            startTime = System.currentTimeMillis()
-            startDate = Date(startTime)
-
-            currentLatLng = LatLng(location.latitude, location.longitude)
-            endLatLng = currentLatLng
-
-            cameraZoom()
-        }
-
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
-
-    private fun cameraZoom() {
-        val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
-        mGoogleMap.apply {
-            moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
-            animateCamera(zoom)
-        }
     }
 
     private fun drawPath(startLatLng: LatLng, endLatLng: LatLng) {
@@ -149,35 +151,39 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun requestLocation() {
         val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         // MIN_TIME_MS 와 MIN_DISTANCE_M 를 만족할 시, onLocationChanged 함수를 호출합니다.
-        locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_MS,
             MIN_DISTANCE_M,
             locationListener)
-//        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_MS,MIN_DISTANCE_M,
-//            locationListener)
     }
 
-    private fun checkMapsApiKey() {
-        if (getString(R.string.maps_api_key).isEmpty()) {
-            Toast.makeText(this, "Add your own API key in secure.properties as MAPS_API_KEY=YOUR_API_KEY", Toast.LENGTH_LONG).show()
+    private val locationListener: LocationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            startTime = System.currentTimeMillis()
+            startDate = Date(startTime)
+
+            currentLatLng = LatLng(location.latitude, location.longitude)
+            if(preLatLng == null) setPreLatLng(currentLatLng)
+            endLatLng = currentLatLng!!
+
+            cameraZoom()
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        override fun onProviderEnabled(provider: String) {}
+        override fun onProviderDisabled(provider: String) {}
+    }
+
+    private fun setPreLatLng(latLng: LatLng) {
+        preLatLng = latLng
+    }
+
+    fun cameraZoom() {
+        val zoom = CameraUpdateFactory.zoomTo(ZOOM_LEVEL);
+        mGoogleMap.apply {
+            moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+            animateCamera(zoom)
         }
     }
-
-    private fun initMap() {
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.actMainMapFrag) as? SupportMapFragment
-        mapFragment?.getMapAsync(this)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    override fun onMapReady(googleMap: GoogleMap?) {
-        googleMap?.apply {
-            mGoogleMap = googleMap
-            checkPermission()
-            mGoogleMap.isMyLocationEnabled = true
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(15F))
-            setDefaultLocation(mGoogleMap)
-        }
-    }
-
     /** TODO
      * RequiresApi 알아보
      */
@@ -194,18 +200,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             checkSelfPermission()
         }
         return
-    }
-
-    private fun setDefaultLocation(mGoogleMap: GoogleMap) {
-        mGoogleMap.apply {
-            val sydney = LatLng(-33.852, 151.211)
-            addMarker(
-                MarkerOptions()
-                    .position(sydney)
-                    .title("Marker in Sydney")
-            )
-            moveCamera(CameraUpdateFactory.newLatLng(sydney))
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
