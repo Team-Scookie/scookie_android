@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         var now : Long = System.currentTimeMillis()
         var nowDate : Date = Date(now)
         const val BASE_TIME : Long = 1 // 1분
+        const val MARKER_TIME : Long = 30 // 30분
 
         // 위치 관련 변수
         lateinit var mGoogleMap : GoogleMap
@@ -107,6 +108,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         drawPath(preLatLng!!, endLatLng)
                         preLatLng = endLatLng
                     }
+
+                    // 30분 이상 머문 경우
+                    if(preLatLng != endLatLng && getMinOfStay() >= MARKER_TIME) {
+                        createMarker(preLatLng!!, getMinOfStay())
+                    }
                 }
             }
         }
@@ -116,6 +122,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 Thread.sleep(THREAD_MS)
                 mHandler?.sendEmptyMessage(0)
             }
+        }
+    }
+
+    private fun createMarker(latLng: LatLng, minOfStay: Long) {
+        mGoogleMap.apply {
+            val newLatLng = latLng
+            addMarker(
+                MarkerOptions()
+                    .position(newLatLng)
+                    .title(minOfStay.toString())
+            )
+            /** TODO
+             *  마커 생성시 마커 비춰야하는지?
+             */
+            // moveCamera(CameraUpdateFactory.newLatLng(newLatLng))
         }
     }
 
