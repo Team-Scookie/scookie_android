@@ -3,7 +3,10 @@
     <color name="colorPrimary">#0497CD</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="colorBrown">#603814</color>
+    <color name="colorBrown">#cc996c</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorYellow">#ffe1a1</color>
+    <color name="colorMint">#a1e3fc</color>
     <color name="lightGray">#DDDDDD</color>
 
     <!-- indicator -->
