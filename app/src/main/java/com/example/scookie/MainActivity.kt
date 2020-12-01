@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         const val ZOOM_LEVEL = 17f
         const val MIN_TIME_MS: Long = 0 // 1초 1000
         const val MIN_DISTANCE_M : Float = 50f // 50M 50f
-        const val LINE_WIDTH : Float = 12f // 12px
+        const val LINE_WIDTH : Float = 8f // 8px
+        const val GAP_WIDTH : Float = 2f // 2px
         const val THREAD_MS : Long = 1000 // 1초
 
         // 시간 계산 관련 변수들
@@ -132,6 +133,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 MarkerOptions()
                     .position(newLatLng)
                     .title(minOfStay.toString())
+
             )
             /** TODO
              *  마커 생성시 마커 비춰야하는지?
@@ -153,7 +155,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
          *  width dpToPx 사용하기
          */
         val dash : PatternItem =  Dash(LINE_WIDTH)
-        val gap : PatternItem = Gap(LINE_WIDTH)
+        val gap : PatternItem = Gap(GAP_WIDTH)
         var dashedLine : List<PatternItem> = listOf(gap, dash);
 
         val options :PolylineOptions = PolylineOptions()
