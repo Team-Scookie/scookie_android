@@ -7,4 +7,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="UnderlineYellow">
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:background">@drawable/underline_yellow</item>
+    </style>
+
+    <style name="UnderlineMint">
+        <item name="android:textColor">@color/colorBlack</item>
+        <item name="android:background">@drawable/underline_mint</item>
+    </style>
 </resources>
