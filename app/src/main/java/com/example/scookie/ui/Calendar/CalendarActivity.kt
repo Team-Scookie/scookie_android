@@ -20,6 +20,8 @@ import kotlinx.android.synthetic.main.activity_calendar.*
 import kotlinx.android.synthetic.main.calendar_date_layout.view.*
 import kotlinx.android.synthetic.main.calendar_day_string.*
 import java.security.AccessController.getContext
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.WeekFields
 import java.util.*
@@ -28,6 +30,8 @@ import java.util.*
 class CalendarActivity : AppCompatActivity() {
 
     lateinit var adapter: CalendarRVAdapter
+
+    private var selectedDate = LocalDate.now() // 선택한 날
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,8 +89,11 @@ class CalendarActivity : AppCompatActivity() {
         val firstMonth = currentMonth.minusMonths(10)
         val lastMonth = currentMonth.plusMonths(10)
         val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+//        act_calendar_calendarView.setup(currentMonth, lastMonth, firstDayOfWeek)
         act_calendar_calendarView.setup(firstMonth, lastMonth, firstDayOfWeek)
-        act_calendar_calendarView.scrollToMonth(currentMonth)
+        act_calendar_calendarView.scrollToDate(LocalDate.now())
+
+        Toast.makeText(this, "current : " + LocalDate.now().toString(), Toast.LENGTH_LONG).show()
 
         // week mode로 설정 (한 줄)
         act_calendar_calendarView.updateMonthConfiguration(
@@ -95,6 +102,9 @@ class CalendarActivity : AppCompatActivity() {
             hasBoundaries = false
         )
 
+        // 날짜를 눌렀을 때
+//        var selectedDate/
+
         act_calendar_calendarView.dayBinder = object : DayBinder<CalendarDayViewContainer> {
             override fun create(view: View) = CalendarDayViewContainer(view)
 
@@ -102,6 +112,15 @@ class CalendarActivity : AppCompatActivity() {
                 container.calendarDateTxt.text = day.date.dayOfMonth.toString()
 
                 container.view.setOnClickListener {
+                    if (selectedDate != day.date) {
+                        val oldDate = selectedDate
+                        selectedDate = day.date
+
+                        Toast.makeText(applicationContext, "selected : " + selectedDate.toString(), Toast.LENGTH_LONG).show()
+                        act_calendar_calendarView.notifyDateChanged(day.date)
+                        oldDate?.let { act_calendar_calendarView.notifyDateChanged(it) } // 이건 뭐지,,
+                    }
+                    /** 이 부분을 따로 빼는게?
                     Toast.makeText(it.context, day.date.dayOfWeek.toString(), Toast.LENGTH_SHORT).show()
 
                     if (it.calendarDateCircleBackground.visibility == View.VISIBLE)
@@ -112,6 +131,7 @@ class CalendarActivity : AppCompatActivity() {
                         it.calendarDateText.setTextColor(Color.WHITE)
                     else
                         it.calendarDateText.setTextColor(Color.parseColor("#373636"))
+                    */
 //            if (day.owner == DayOwner.THIS_MONTH) {
 //                Toast.makeText(view.context, "clickclick", Toast.LENGTH_SHORT).show()
 //                        if (selectedDates.contains(day.date)) {
@@ -164,15 +184,20 @@ class CalendarActivity : AppCompatActivity() {
             // months/years.
             val firstDate = it.weekDays.first().first().date
             val lastDate = it.weekDays.last().last().date
+
             if (firstDate.yearMonth == lastDate.yearMonth) {
                 current_month_tv.text = firstDate.monthValue.toString()
+
+                current_year_tv.text = firstDate.yearMonth.year.toString()
             } else {
                 current_month_tv.text =
                     "${firstDate.monthValue.toString()} - ${lastDate.monthValue.toString()}"
                 if (firstDate.year == lastDate.year) {
 //                    binding.exOneYearText.text = firstDate.yearMonth.year.toString()
+                    current_year_tv.text = firstDate.yearMonth.year.toString()
                 } else {
 //                    binding.exOneYearText.text = "${firstDate.yearMonth.year} - ${lastDate.yearMonth.year}"
+                    current_year_tv.text = "${firstDate.yearMonth.year} - ${lastDate.yearMonth.year}"
                 }
             }
         }
