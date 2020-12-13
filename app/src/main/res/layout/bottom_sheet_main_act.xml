@@ -19,7 +19,7 @@
         android:layout_width="46dp"
         android:layout_height="3dp"
         android:layout_marginTop="8dp"
-        android:background="@drawable/lightgray_border_fill"
+        android:background="@drawable/e9e9e9_border_fill"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
