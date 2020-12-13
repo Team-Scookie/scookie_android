@@ -2,4 +2,8 @@
     <string name="app_name">Scookie</string>
     <string name="getEmail">이메일을 입력해주세요</string>
     <string name="login">로그인</string>
+
+    <!-- rv_item_place_card.xml -->
+    <string name="near_by">근처 장소</string>
+    <string name="add_address">장소 추가</string>
 </resources>
