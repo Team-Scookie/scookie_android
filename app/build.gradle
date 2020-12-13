@@ -23,7 +23,7 @@ android {
         resValue "string", "maps_api_key", (secureProps.getProperty("MAPS_API_KEY") ?: "")
 
         /**
-         * @author ChoSooMin
+         * @author soomin
          * @feature Calendar
          */
         // Required ONLY when setting minSdkVersion to 20 or lower
@@ -31,7 +31,7 @@ android {
     }
 
     /**
-     * @author ChoSooMin
+     * @author soomin
      * @feature Calendar
      */
     compileOptions {
@@ -48,6 +48,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    /**
+     * @author soomin
+     * @feature ViewBinding
+     */
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -62,6 +70,12 @@ dependencies {
 
     // google map
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+
+    // recycler view
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+    // For control over item selection of both touch and mouse driven selection
+    implementation "androidx.recyclerview:recyclerview-selection:1.1.0-rc03"
+
 
     // google material design
     implementation 'com.google.android.material:material:1.2.0'

@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:src="@color/colorOrange"
         android:layout_margin="10dp"
-        android:visibility="invisible"/>
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/calendarDateText"
