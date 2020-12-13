@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rv_item_place_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorWhite"
+            android:outlineSpotShadowColor="#19000000"
+            android:paddingHorizontal="14dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/near_by_category_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="장소 분"
+                android:textColor="@color/colorBlack"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/near_by_title_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:text="아름다운 이땅에 금수강산에"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/near_by_category_tv" />
+
+            <TextView
+                android:id="@+id/near_by_address_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                tools:text="이문동 111-9"
+                android:textColor="@color/colorBlack"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/near_by_title_tv" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
