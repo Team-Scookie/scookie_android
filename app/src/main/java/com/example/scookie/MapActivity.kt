@@ -116,8 +116,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setRecyclerView() {
         var dataList = mutableListOf<PlaceData>()
-        dataList.add(PlaceData("2020년 12월 13일","주소를 입력해주세요","서울특별시 강남구 도곡동 418-10","37"))
-        dataList.add(PlaceData("2020년 12월 13일","주소를 입력해주세요","서울특별시 강남구 도곡동 418-10","37"))
+        dataList.add(PlaceData("2020년 12월 13일","","서울특별시 강남구 도곡동 418-10","37"))
+        dataList.add(PlaceData("2020년 12월 13일","","서울특별시 강남구 도곡동 418-10","37"))
         locationRVAdapter =
             LocationRVAdapter(this, dataList)
         act_main_rv_location_card.adapter = locationRVAdapter
