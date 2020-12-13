@@ -6,7 +6,7 @@
     android:id="@+id/bottom_sheet_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MapActivity">
 
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:padding="12dp"
-        tools:context="com.example.scookie.MainActivity"/>
+        tools:context="com.example.scookie.MapActivity"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/act_main_rv_location_card"

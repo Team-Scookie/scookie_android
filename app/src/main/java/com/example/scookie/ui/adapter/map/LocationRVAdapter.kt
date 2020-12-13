@@ -1,4 +1,4 @@
-package com.example.scookie.ui.adapter
+package com.example.scookie.ui.adapter.map
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.scookie.MainActivity
+import com.example.scookie.MapActivity
 import com.example.scookie.R
 import com.example.scookie.model.PlaceData
 
@@ -29,7 +29,7 @@ class LocationRVAdapter(val ctx: FragmentActivity, var dataList: MutableList<Pla
         holder.minute.text = dataList[position].minute
 
         holder.nearBy.setOnClickListener {
-            (ctx as MainActivity).setDrawer()
+            (ctx as MapActivity).setDrawer()
         }
 // 나중에 이미지 사용시 참
 //        Glide.with(ctx)
