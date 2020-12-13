@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -12,16 +13,28 @@ import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.util.Log
+import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.scookie.model.NearByPlaceData
+import com.example.scookie.model.PlaceData
+import com.example.scookie.ui.adapter.map.LocationRVAdapter
+import com.example.scookie.ui.adapter.map.NearByPlaceRVAdapter
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -53,19 +66,104 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         // 스레드 관련 변수들
         private var mHandler: Handler? = null
 
+        // Marker RVView
+        lateinit var locationRVAdapter: LocationRVAdapter
+
+        // NearByRVView
+        lateinit var nearByPlaceRVAdapter: NearByPlaceRVAdapter
+
+        // Bottom drawer
+        lateinit var behavior : BottomSheetBehavior<ConstraintLayout>
+        lateinit var drawer: ConstraintLayout
+        lateinit var coordinator: CoordinatorLayout
+
         private var polylines : MutableList<Polyline> = mutableListOf()
     }
-
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+//        setStatusBar()
         checkSelfPermission()
         checkMapsApiKey()
         initMap()
+        setRecyclerView()
     }
 
+    private fun setStatusBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //make fullscreen, so we can draw behind status bar
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+            //make status bar color transparent
+            window.statusBarColor = Color.TRANSPARENT
+            var flags = window.decorView.systemUiVisibility
+            // make dark status bar icons
+            flags =
+                flags xor View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                //make navigation bar color white
+                window.navigationBarColor = Color.WHITE
+                // make dark navigation bar icons
+                flags =
+                    flags xor View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            }
+            window.decorView.systemUiVisibility = flags
+        }
+    }
+
+    private fun setRecyclerView() {
+        var dataList = mutableListOf<PlaceData>()
+        dataList.add(PlaceData("2020년 12월 13일","주소를 입력해주세요","서울특별시 강남구 도곡동 418-10","37"))
+        dataList.add(PlaceData("2020년 12월 13일","주소를 입력해주세요","서울특별시 강남구 도곡동 418-10","37"))
+        locationRVAdapter =
+            LocationRVAdapter(this, dataList)
+        act_main_rv_location_card.adapter = locationRVAdapter
+        act_main_rv_location_card.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
+    }
+
+    fun setDrawer() {
+        coordinator = findViewById(R.id.bottom_sheet_coordinator)
+        drawer = findViewById(R.id.bottom_sheet_drawer) as ConstraintLayout
+        behavior = BottomSheetBehavior.from(drawer)
+
+        val btn_close = drawer.findViewById(R.id.bottom_sheet_close_btn) as Button
+        btn_close.setOnClickListener {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        if (behavior.state != BottomSheetBehavior.STATE_EXPANDED) {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        } else {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        setNearByRecyclerView()
+    }
+
+    private fun setNearByRecyclerView() {
+        var dataList = mutableListOf<NearByPlaceData>()
+        dataList.add(NearByPlaceData("장소 분류","아름다운 이땅에 금수강산","서울특별시 강남구 도곡동 418-10"))
+        dataList.add(NearByPlaceData("장소 분류","주소를 입력해주세요","이문동 111-9"))
+        dataList.add(NearByPlaceData("장소 분류","아름다운 이땅에 금수강산","서울특별시 강남구 도곡동 418-10"))
+        dataList.add(NearByPlaceData("장소 분류","주소를 입력해주세요","이문동 111-9"))
+        dataList.add(NearByPlaceData("장소 분류","아름다운 이땅에 금수강산","서울특별시 강남구 도곡동 418-10"))
+        dataList.add(NearByPlaceData("장소 분류","주소를 입력해주세요","이문동 111-9"))
+        dataList.add(NearByPlaceData("장소 분류","아름다운 이땅에 금수강산","서울특별시 강남구 도곡동 418-10"))
+        dataList.add(NearByPlaceData("장소 분류","주소를 입력해주세요","이문동 111-9"))
+        dataList.add(NearByPlaceData("장소 분류","아름다운 이땅에 금수강산","서울특별시 강남구 도곡동 418-10"))
+        dataList.add(NearByPlaceData("장소 분류","주소를 입력해주세요","이문동 111-9"))
+        nearByPlaceRVAdapter =
+            NearByPlaceRVAdapter(
+                this,
+                dataList
+            )
+        val rvNearByPlace= drawer.findViewById(R.id.bottom_sheet_rv_item_near_by_place) as RecyclerView
+        rvNearByPlace.adapter = nearByPlaceRVAdapter
+        rvNearByPlace.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+    }
 
     private fun checkMapsApiKey() {
         if (getString(R.string.maps_api_key).isEmpty()) {
