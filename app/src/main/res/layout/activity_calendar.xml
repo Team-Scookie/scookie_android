@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.Calendar.CalendarActivity">
+    tools:context=".ui.Calendar.CalendarActivity"
+    android:background="#f9f9f9">
 
     <include
         android:id="@+id/act_calendar_top_bar"

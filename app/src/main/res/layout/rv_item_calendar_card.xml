@@ -7,7 +7,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="256dp"
-        android:layout_height="376dp"
+        android:layout_height="388dp"
         app:cardCornerRadius="30dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -22,7 +22,131 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:scaleType="centerCrop"
-                android:background="#000000" />
+                android:background="@color/colorBeige" />
+
+            <TextView
+                android:id="@+id/card_month_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/card_date_tv"
+                app:layout_constraintBottom_toTopOf="@id/card_date_tv"
+                android:text="8"
+                android:textSize="48sp"
+                android:textColor="@color/colorGreyScale"
+                android:fontFamily="@font/nanumbarungothic_ultralight"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/card_month_tv"
+                app:layout_constraintBottom_toBottomOf="@id/card_month_tv"
+                android:layout_marginLeft="2dp"
+                android:text="월"
+                android:textSize="18sp"
+                android:fontFamily="@font/nanumbarungothic_regular"
+                android:textColor="@color/colorGreyScale"
+                android:layout_marginBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/card_date_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@id/cardView_info_constraint"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginLeft="16dp"
+                android:text="21"
+                android:textSize="48sp"
+                android:textColor="@color/colorGreyScale"
+                android:fontFamily="@font/nanumbarungothic_ultralight"
+                android:layout_marginBottom="15dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/card_date_tv"
+                app:layout_constraintBottom_toBottomOf="@id/card_date_tv"
+                android:text="일"
+                android:textColor="@color/colorGreyScale"
+                android:fontFamily="@font/nanumbarungothic_regular"
+                android:textSize="18sp"
+                android:layout_marginBottom="6dp"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardView_info_constraint"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:background="@color/colorWhite"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/card_title_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginLeft="15dp"
+                    android:fontFamily="@font/nanumbarungothic_regular"
+                    android:text="이태원에서의 하루"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorBlack2"/>
+
+                <TextView
+                    android:id="@+id/card_description_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/card_title_tv"
+                    app:layout_constraintStart_toStartOf="@id/card_title_tv"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/nanumbarungothic_ultralight"
+                    android:text="아무도 모르는 곳에 가고 싶었어요"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorBlack2"/>
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/card_constraint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/card_description_tv"
+                    app:layout_constraintStart_toStartOf="@id/card_description_tv"
+                    android:layout_marginTop="8dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/card_constraint"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:background="@color/colorBeige"
+                        android:layout_marginBottom="-2dp"/>
+
+                    <TextView
+                        android:id="@+id/card_cookie_num"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="10"
+                        android:textColor="@color/colorBrown"
+                        android:fontFamily="@font/nanumbarungothic_regular"
+                        android:layout_marginLeft="4dp"/>
+
+                    <TextView
+                        android:id="@+id/card_cookie_txt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toEndOf="@id/card_cookie_num"
+                        app:layout_constraintTop_toTopOf="@id/card_cookie_num"
+                        android:text=" 쿠키"
+                        android:textColor="@color/colorBrown"
+                        android:fontFamily="@font/nanumbarungothic_regular"
+                        android:paddingRight="4dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

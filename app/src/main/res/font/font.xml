@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- fontWeight는 CSS Font Module Level 3를 따른다.-->
+
+    <!--bold-->
+    <font
+        android:font="@font/nanumbarungothic_bold"
+        android:fontStyle="normal"
+        android:fontWeight="700"/>
+
+    <!--regular-->
+    <font
+        android:font="@font/nanumbarungothic_regular"
+        android:fontStyle="normal"
+        android:fontWeight="400"/>
+
+    <!--light-->
+    <font
+        android:font="@font/nanumbarungothic_light"
+        android:fontStyle="normal"
+        android:fontWeight="300"/>
+
+    <!--ultra light-->
+    <font
+        android:font="@font/nanumbarungothic_ultralight"
+        android:fontStyle="normal"
+        android:fontWeight="200"/>
+
+</font-family>

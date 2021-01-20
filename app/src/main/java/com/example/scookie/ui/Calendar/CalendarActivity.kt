@@ -173,6 +173,10 @@ class CalendarActivity : AppCompatActivity() {
                 }
             }
         }
+
+        /**
+         * CalendarView를 월 단위로 보여주는 기능 (캘린더 아이콘 누르면)
+         */
     }
 
 }
