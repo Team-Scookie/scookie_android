@@ -6,4 +6,5 @@
     <!-- rv_item_place_card.xml -->
     <string name="near_by">근처 장소</string>
     <string name="add_address">장소 추가</string>
+    <string name="enter_place_name">장소 이름을 입력하세요</string>
 </resources>
