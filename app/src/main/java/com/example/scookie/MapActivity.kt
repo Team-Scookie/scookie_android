@@ -5,7 +5,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -35,6 +37,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.activity_map.*
+import org.koin.experimental.builder.create
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -193,6 +196,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         mGoogleMap.apply {
             val sydney = LatLng(-33.852, 151.211)
             moveCamera(CameraUpdateFactory.newLatLng(sydney))
+//            createMarker(sydney, 30) // marker image test
         }
     }
 
@@ -231,7 +235,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 MarkerOptions()
                     .position(newLatLng)
                     .title(minOfStay.toString())
-
+                    .icon(BitmapDescriptorFactory.fromBitmap(pngToBitmap()))
             )
             /** TODO
              *  마커 생성시 마커 비춰야하는지?
@@ -239,6 +243,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             // moveCamera(CameraUpdateFactory.newLatLng(newLatLng))
         }
     }
+
+    private fun pngToBitmap() : Bitmap {
+        val bitmapdraw: BitmapDrawable = resources.getDrawable(R.drawable.cookie_marker) as BitmapDrawable
+        val b: Bitmap = bitmapdraw.getBitmap()
+        return Bitmap.createScaledBitmap(b, 200, 200, false)
+    }
+
 
     private fun getMinOfStay() : Long {
         now = System.currentTimeMillis()
