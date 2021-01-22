@@ -20,4 +20,5 @@
     <color name="colorBlack2">#000000</color>
     <color name="colorBeige">#f6ebe1</color>
     <color name="colorGreyScale">#232322</color>
+    <color name="colorGreyScale01">#f9f9f9</color>
 </resources>
